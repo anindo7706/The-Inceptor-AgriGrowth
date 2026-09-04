@@ -8,18 +8,24 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run lint",
+    "verify": "npm run typecheck && npm run lint && npm run test",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@prisma/client": "^7.10.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.41.0",
     "next": "16.3.4",
+    "prisma": "^8.0.0-rc.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "vitest": "^4.1.11",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -31,5 +37,8 @@
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "node --experimental-strip-types prisma/seed.ts"
   }
 }

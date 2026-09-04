@@ -162,6 +162,58 @@
   .ring-hairline {
     box-shadow: inset 0 0 0 1px var(--color-border);
   }
+
+  /*
+    Frosted glass over the background photograph.
+
+    `--glass-tint` keeps enough opacity that text meets its contrast floor
+    even where the photo behind is bright — a blur alone is not a contrast
+    guarantee. Where `backdrop-filter` is unsupported the tint alone still
+    carries the surface, so this degrades rather than breaking.
+
+    Cost: backdrop-filter is GPU-expensive on large surfaces. Use it on
+    panels and tiles, never on scrolling lists, and never on the worker or
+    inspector field screens (DESIGN.md §12.2).
+  */
+  .glass {
+    background-color: color-mix(in srgb, var(--color-night-raised) 72%, transparent);
+    backdrop-filter: blur(20px) saturate(115%);
+    -webkit-backdrop-filter: blur(20px) saturate(115%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--color-cream) 9%, transparent),
+      inset 0 1px 0 0 color-mix(in srgb, var(--color-cream) 7%, transparent);
+  }
+
+  .glass-card {
+    background-color: color-mix(in srgb, var(--color-night-card) 60%, transparent);
+    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--color-cream) 8%, transparent);
+  }
+
+  /* Interactive glass — tiles, tabs, pills. Lifts toward the lime on hover. */
+  .glass-interactive {
+    transition:
+      background-color var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
+  }
+
+  .glass-interactive:hover {
+    background-color: color-mix(in srgb, var(--color-night-card) 78%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--color-lime) 34%, transparent);
+  }
+}
+
+/* The blur is decorative; the tint is what carries contrast. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--color-night-raised);
+  }
 }
 
 /*

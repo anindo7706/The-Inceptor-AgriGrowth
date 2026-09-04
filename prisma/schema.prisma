@@ -1,0 +1,334 @@
+// AgriGrowth — Phase 1 schema
+//
+// Prisma owns `public`. Supabase owns `auth` — no migration may touch it
+// (docs/SUPABASE_SETUP.md §5). Review every generated migration before
+// applying: if it mentions `auth.`, `storage.` or DROP SCHEMA, stop.
+//
+// Money is ALWAYS integer paise in BigInt. Never a float (CLAUDE.md §4.1).
+//
+// Later phases add Land, Contract, Milestone, Task, WorkerJob, Evidence,
+// InspectionJob, CollectionCenter and the rest. The enums for those state
+// machines are defined here already, because the state-machine module and
+// its tests are Phase 1 deliverables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Identity
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Roles a user may hold. INSPECTOR and ADMIN are never self-assigned —
+/// §29A.1 requires inspectors to be authorised by AgriGrowth. The allowlist
+/// is enforced server-side, not by hiding options in the UI.
+enum Role {
+  BUYER
+  LANDOWNER
+  WORKER
+  INSPECTOR
+  ADMIN
+}
+
+/// Mirrors auth.users. `id` is the Supabase user id — never app-generated.
+model User {
+  id        String   @id @db.Uuid
+  email     String?  @unique
+  phone     String?  @unique
+  fullName  String
+  /// Shared only after assignment + acceptance (§23). Enforced in the
+  /// serializer, never by omitting it from a template.
+  contactPhone String?
+  locale    String   @default("en")
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles         UserRole[]
+  auditEntries  AuditLog[]
+  notifications Notification[]
+
+  @@index([isDemo])
+}
+
+/// R-18: a user holds one or more roles. A smallholder who owns land and
+/// also works a neighbour's field is both LANDOWNER and WORKER — the common
+/// case in rural India, not an edge case. Authorization asks "does this user
+/// hold role X", never "is this user's role X".
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  role      Role
+  /// Null for self-service roles. Set to the granting admin for INSPECTOR
+  /// and ADMIN, which is the auditable half of §29A.1.
+  grantedBy String?  @db.Uuid
+  grantedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@index([role])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Crops (§6, §15, §16)
+// ─────────────────────────────────────────────────────────────────────────
+
+model CropCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  crops Crop[]
+}
+
+model Crop {
+  id         String @id @default(uuid()) @db.Uuid
+  categoryId String @db.Uuid
+  name       String
+  slug       String @unique
+
+  /// R-8: TWO yield constants, deliberately.
+  /// `planningYieldPerAcre` is conservative, carries the §7 safety buffer,
+  /// and sizes land only. `forecastYieldPerAcre` is the regional baseline
+  /// that moves with health, weather and stage. Using one number for both
+  /// makes the day-one forecast equal the ordered quantity exactly — a
+  /// number that looks like a prediction and carries no information.
+  planningYieldPerAcreKg Int
+  forecastYieldPerAcreKg Int
+
+  /// R-3: activation seeds plantedAt as activationDate + this, and marks the
+  /// timeline provisional until the landowner confirms the real date.
+  preparationLeadDays Int @default(7)
+
+  durationDays Int
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category CropCategory @relation(fields: [categoryId], references: [id])
+  plan     CropPlan?
+
+  @@index([categoryId])
+}
+
+/// §15 — one configurable plan per crop. Timelines must be crop-specific;
+/// §16 is explicit that different crops must not share a fixed schedule.
+model CropPlan {
+  id        String   @id @default(uuid()) @db.Uuid
+  cropId    String   @unique @db.Uuid
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  crop   Crop        @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  stages CropStage[]
+}
+
+enum StageKind {
+  PREPARATION
+  PLANTING
+  EARLY_GROWTH
+  VEGETATIVE_GROWTH
+  REPRODUCTIVE
+  MATURITY
+  HARVEST
+  POST_HARVEST
+}
+
+model CropStage {
+  id     String    @id @default(uuid()) @db.Uuid
+  planId String    @db.Uuid
+  kind   StageKind
+  name   String
+  /// Offsets from the planting date, not absolute dates (§16).
+  startDayOffset Int
+  endDayOffset   Int
+  sortOrder      Int
+
+  /// §20 — workers = area × workerFactor × taskFactor. Both live here so an
+  /// admin can retune them without a deploy (CLAUDE.md §4.4).
+  workerFactorPerAcre Decimal @db.Decimal(6, 3)
+  taskFactor          Decimal @default(1.0) @db.Decimal(6, 3)
+
+  requiresEvidence Boolean @default(true)
+  requiresGpsCheckIn Boolean @default(true)
+
+  plan CropPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, sortOrder])
+  @@index([planId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// State vocabularies — R-6
+//
+// §14, §17 and §47 gave contradictory lists. These enums are the union,
+// with UNDER_REVIEW (contract) and REVIEW_REQUIRED (task) as the surviving
+// review names. The transition tables live in src/lib/domain/state-machines.
+// ─────────────────────────────────────────────────────────────────────────
+
+enum LandStatus {
+  AVAILABLE
+  RESERVED
+  UNDER_CONTRACT
+  /// R-17: owner-set, enterable only from AVAILABLE.
+  UNAVAILABLE
+}
+
+enum ContractStatus {
+  DRAFT
+  SUBMITTED
+  /// Present in §14, missing from §47. Not cosmetic — §4 requires admin
+  /// validation between submission and offer, and it is the platform's only
+  /// gate on a bad contract request.
+  UNDER_REVIEW
+  OFFERED
+  PARTIALLY_ACCEPTED
+  /// R-5: without this a partially-accepted contract has no path forward
+  /// when land declines and re-offer rounds are exhausted.
+  AWAITING_BUYER_DECISION
+  ACTIVE
+  AT_RISK
+  COMPLETED
+  DECLINED
+  CANCELLED
+  DISPUTED
+}
+
+enum TaskStatus {
+  PENDING
+  UPCOMING
+  ACTIVE
+  SUBMITTED_FOR_REVIEW
+  REVIEW_REQUIRED
+  COMPLETED
+  SKIPPED
+  DELAYED
+  REJECTED
+}
+
+enum JobStatus {
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/// §29A.6 — seven outcomes. VERIFIED_WITH_OBSERVATIONS is not VERIFIED, and
+/// SUSPECTED_FRAUD is not FAILED. Each needs its own treatment.
+enum InspectionStatus {
+  SCHEDULED
+  ACCEPTED
+  IN_PROGRESS
+  SUBMITTED
+  VERIFIED
+  VERIFIED_WITH_OBSERVATIONS
+  EVIDENCE_MISMATCH
+  REINSPECTION_REQUIRED
+  HIGH_RISK
+  SUSPECTED_FRAUD
+  FAILED
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Platform configuration (CLAUDE.md §4.4)
+//
+// Yield factors, worker factors, commission, GPS radius, AI thresholds,
+// offer TTL, inspection triggers — every tunable the PRD mentions lives
+// here and is read through src/lib/config. A magic number in a component
+// is a bug.
+// ─────────────────────────────────────────────────────────────────────────
+
+enum ConfigValueType {
+  INT
+  DECIMAL
+  BIGINT_PAISE
+  BOOLEAN
+  STRING
+  JSON
+}
+
+model PlatformConfig {
+  key         String          @id
+  valueType   ConfigValueType
+  value       String
+  /// What this controls, and which PRD section it comes from.
+  description String
+  prdSection  String?
+  updatedBy   String?         @db.Uuid
+  updatedAt   DateTime        @updatedAt
+
+  @@index([valueType])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Audit (CLAUDE.md §4.6)
+//
+// Every state change writes a row. Inspection results are append-only:
+// corrections add records, they never overwrite (§29A.8).
+// ─────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  /// Null for system-initiated transitions (scheduled offer expiry, timeline
+  /// regeneration). Never null for a user action.
+  actorId    String?  @db.Uuid
+  entityType String
+  entityId   String
+  fromState  String?
+  toState    String?
+  action     String
+  reason     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Notifications — R-14
+//
+// Referenced throughout the PRD and specified nowhere. A typed catalogue
+// beats ad-hoc inserts scattered across services.
+// ─────────────────────────────────────────────────────────────────────────
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+model Notification {
+  id        String              @id @default(uuid()) @db.Uuid
+  userId    String              @db.Uuid
+  /// Catalogue key, e.g. OFFER_RECEIVED, TASK_DUE, WEATHER_SKIP.
+  type      String
+  channel   NotificationChannel @default(IN_APP)
+  title     String
+  body      String
+  entityType String?
+  entityId   String?
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([type])
+}

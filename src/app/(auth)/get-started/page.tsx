@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Map, ShoppingBasket, Sprout } from "lucide-react";
 import { LogoLockup } from "@/components/brand/logo";
+import { PhotoBackdrop } from "@/components/layout/photo-backdrop";
 
 export const metadata: Metadata = {
   title: "Get started — AgriGrowth",
@@ -45,7 +46,9 @@ const ROLES = [
 
 export default function GetStartedPage() {
   return (
-    <main className="min-h-dvh bg-night px-5 py-10 lg:py-16">
+    <main className="relative min-h-dvh px-5 py-10 lg:py-16">
+      <PhotoBackdrop />
+
       <div className="mx-auto max-w-[1000px]">
         <div className="flex flex-col items-center text-center">
           <LogoLockup />
@@ -63,7 +66,7 @@ export default function GetStartedPage() {
             <li key={role}>
               <Link
                 href={`/register?role=${role.toLowerCase()}`}
-                className={`animate-fade-rise group relative flex h-full min-h-[72px] flex-col overflow-hidden rounded-[var(--radius-panels)] bg-night-raised p-6 ring-hairline transition-colors duration-[--duration-base] ease-[--ease-standard] hover:bg-night-card`}
+                className={`animate-fade-rise group relative flex h-full min-h-[72px] flex-col overflow-hidden rounded-[var(--radius-panels)] glass glass-interactive p-6`}
                 style={{ animationDelay: `${i * 30}ms` }}
               >
                 <span

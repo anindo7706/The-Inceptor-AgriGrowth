@@ -3,6 +3,7 @@ import { ChevronDown, Globe, ShieldCheck } from "lucide-react";
 import { AuthShowcase } from "@/components/auth/auth-showcase";
 import { LoginForm } from "@/components/auth/login-form";
 import { LeafMark, LogoLockup } from "@/components/brand/logo";
+import { PhotoBackdrop } from "@/components/layout/photo-backdrop";
 
 export const metadata: Metadata = {
   title: "Log in — AgriGrowth",
@@ -10,11 +11,13 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-dvh bg-night p-3 lg:p-5">
+    <main className="relative min-h-dvh p-3 lg:p-5">
+      <PhotoBackdrop />
+
       <div className="mx-auto grid max-w-[1240px] gap-3 lg:grid-cols-[48fr_52fr] lg:gap-5">
         <AuthShowcase />
 
-        <section className="animate-fade-rise relative flex flex-col rounded-[var(--radius-panels)] bg-night-raised px-5 py-8 ring-hairline lg:px-14 lg:py-10">
+        <section className="animate-fade-rise relative flex flex-col rounded-[var(--radius-panels)] glass px-5 py-8 lg:px-14 lg:py-10">
           {/*
             Language selector. Inert until i18n lands — see DESIGN.md open
             decision 4, which also decides whether Noto Sans Devanagari ships.
@@ -22,7 +25,7 @@ export default function LoginPage() {
           <div className="flex justify-end">
             <button
               type="button"
-              className="flex h-11 items-center gap-2 rounded-[var(--radius-buttons)] border border-border bg-night-card px-4 text-body-sm text-cream transition-colors duration-[--duration-fast] hover:border-border-hi"
+              className="flex h-11 items-center gap-2 rounded-[var(--radius-buttons)] glass-card glass-interactive px-4 text-body-sm text-cream"
             >
               <Globe className="h-4 w-4 text-mist-dim" strokeWidth={1.6} />
               English
@@ -37,7 +40,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <aside className="relative overflow-hidden rounded-[var(--radius-cards)] bg-night-card p-5 ring-hairline">
+          <aside className="relative overflow-hidden rounded-[var(--radius-cards)] glass-card p-5">
             <LeafMark
               className="pointer-events-none absolute -bottom-4 right-2 h-24 w-24 text-lime/10"
               aria-hidden="true"

@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   AgriGrowth theme — derived from docs/design/theme.css (Arva reference)
+   plus the semantic tokens defined in DESIGN.md §2.
+   Do not edit docs/design/*; that is read-only reference.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Base palette (Arva, unchanged) ─────────────────────────────────── */
+  --color-forest-ink: #07503f;
+  --color-vivid-lime: #e8fe85;
+  --color-bone: #f1efdf;
+  --color-pure-white: #ffffff;
+  --color-ash-gray: #efefef;
+  --color-charcoal: #212529;
+  --color-graphite: #353535;
+  --color-pewter: #6d6d6d; /* marketing parity only — fails AA on bone (4.47:1) */
+  --color-sky-card: #b2cee7;
+  --color-peach-card: #fceace;
+  --color-sage-card: #e6ecd5;
+  --color-moss: #c3cda7;
+
+  /* ── Semantic tokens (DESIGN.md §2) — named for meaning, not appearance ─ */
+  --color-verified: #07503f; /* 8.15:1 on bone  · 9.42:1 on white */
+  --color-estimated: #6b5220; /* 6.36:1 on bone  · 7.36:1 on white */
+  --color-warning: #74400a; /* 7.32:1 on bone  · 8.47:1 on white */
+  --color-risk: #8f2018; /* 7.60:1 on bone  · 8.79:1 on white */
+  --color-neutral: #353535; /* 10.60:1 on bone · 12.27:1 on white */
+  --color-muted: #545454; /* 6.55:1 on bone  · 7.57:1 on white */
+
+  /* Tints for badge and status fills */
+  --color-verified-tint: #e6ecd5;
+  --color-estimated-tint: #f5edd9;
+  --color-warning-tint: #fceace;
+  --color-risk-tint: #f7e3e0;
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-serif:
+    var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.025em;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: 0.025em;
+  --text-body: 16px;
+  --text-body--line-height: 1.52;
+  --text-body--letter-spacing: -0.022em;
+  --text-subheading: 24px;
+  --text-subheading--line-height: 1.24;
+  --text-subheading--letter-spacing: -0.012em;
+  --text-heading-sm: 37px;
+  --text-heading-sm--line-height: 1.22;
+  --text-heading-sm--letter-spacing: -0.012em;
+  --text-heading: 45px;
+  --text-heading--line-height: 1.06;
+  --text-heading--letter-spacing: -0.012em;
+  --text-heading-lg: 57px;
+  --text-heading-lg--line-height: 1.06;
+  --text-heading-lg--letter-spacing: -0.022em;
+  --text-display: 80px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.037em;
+
+  /* ── Radii (Arva shape language) ────────────────────────────────────── */
+  --radius-field: 12px; /* auth inputs + buttons, per login reference */
+  --radius-cards: 20px;
+  --radius-links: 26px;
+  --radius-hero-cards: 30px;
+  --radius-inputs: 33px;
+  --radius-buttons: 100px;
+  --radius-nav-pills: 110px;
+
+  /* ── Motion (DESIGN.md §12.1) ───────────────────────────────────────── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-deliberate: 500ms;
+  --duration-editorial: 800ms;
+
+  /* ── Layout ─────────────────────────────────────────────────────────── */
+  --page-max-width: 1200px;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.52;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Quantities, currency and dates must not shift width while loading. */
+  [data-numeric],
+  table td,
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Visible focus everywhere — forest ink ring (DESIGN.md §13). */
+  :focus-visible {
+    outline: 2px solid var(--color-forest-ink);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Motion utilities (DESIGN.md §12.3) ───────────────────────────────── */
+
+@layer utilities {
+  @keyframes ag-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ag-fade-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .animate-fade-in {
+    animation: ag-fade-in var(--duration-base) var(--ease-entrance) both;
+  }
+
+  .animate-fade-rise {
+    animation: ag-fade-rise var(--duration-base) var(--ease-entrance) both;
+  }
+}
+
+/*
+  Reduced motion is substitution, not deletion (DESIGN.md §12.6).
+  Fade+rise collapses to fade; decorative loops stop; progress indicators
+  are left alone because they carry real information.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-rise {
+    animation-name: ag-fade-in;
+  }
+
+  *:not([data-progress]),
+  *:not([data-progress])::before,
+  *:not([data-progress])::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

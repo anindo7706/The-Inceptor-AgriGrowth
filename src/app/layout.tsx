@@ -57,7 +57,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${jakarta.variable} ${inter.variable} ${cormorant.variable}`}>
-      <body>{children}</body>
+      {/*
+        Extensions like Grammarly and password managers add attributes to
+        <body> before React hydrates, which reads as a hydration mismatch and
+        is not something the app can prevent.
+
+        suppressHydrationWarning applies to THIS element only — its own
+        attributes and text, one level deep. It does not silence mismatches
+        inside the tree, so a real bug in a page still surfaces normally.
+      */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

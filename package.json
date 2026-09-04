@@ -13,14 +13,14 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^7.10.0",
+    "@prisma/client": "^6.19.3",
     "clsx": "^2.1.1",
     "lucide-react": "^1.41.0",
     "next": "16.3.4",
-    "prisma": "^8.0.0-rc.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwind-merge": "^3.6.0",
@@ -35,10 +35,13 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   },
-  "prisma": {
-    "seed": "node --experimental-strip-types prisma/seed.ts"
+  "allowScripts": {
+    "@prisma/engines@6.19.3": true,
+    "@prisma/client@6.19.3": true
   }
 }

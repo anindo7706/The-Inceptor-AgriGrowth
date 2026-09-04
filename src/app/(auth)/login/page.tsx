@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChevronDown, Globe, ShieldCheck } from "lucide-react";
 import { AuthShowcase } from "@/components/auth/auth-showcase";
@@ -36,7 +37,9 @@ export default function LoginPage() {
           <div className="flex flex-1 flex-col items-center justify-center py-8">
             <LogoLockup />
             <div className="mt-8 w-full">
-              <LoginForm />
+              <Suspense fallback={<div className="h-[520px] w-full max-w-[400px]" />}>
+                <LoginForm />
+              </Suspense>
             </div>
           </div>
 

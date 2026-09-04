@@ -30,14 +30,13 @@ function GoogleMark() {
 }
 
 const FIELD =
-  "h-14 w-full rounded-[var(--radius-field)] border border-moss bg-pure-white pl-11 pr-4 text-body text-charcoal " +
-  "placeholder:text-muted transition-colors duration-[--duration-fast] " +
-  "focus:border-forest-ink focus:outline-none";
+  "h-14 w-full rounded-[var(--radius-field)] border border-border bg-night-card pl-11 pr-4 text-body text-cream " +
+  "transition-colors duration-[--duration-fast] focus:border-lime focus:outline-none";
 
 const SECONDARY_BTN =
-  "flex h-14 w-full items-center justify-center gap-3 rounded-[var(--radius-field)] border border-moss " +
-  "bg-pure-white text-body-sm font-medium text-charcoal transition-colors duration-[--duration-fast] " +
-  "hover:bg-ash-gray focus-visible:outline-none";
+  "flex h-14 w-full items-center justify-center gap-3 rounded-[var(--radius-field)] border border-border " +
+  "bg-night-card text-body-sm font-medium text-cream transition-colors duration-[--duration-fast] " +
+  "hover:border-border-hi hover:bg-night-raised";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,10 +53,10 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-[400px]">
       <div className="text-center">
-        <h2 className="font-serif text-subheading font-semibold text-forest-ink">
+        <h2 className="font-display text-subheading font-semibold text-cream">
           Welcome Back!
         </h2>
-        <p className="mt-2 text-body-sm text-muted">
+        <p className="mt-2 text-body-sm text-mist">
           Login to continue your journey
         </p>
       </div>
@@ -68,7 +67,7 @@ export function LoginForm() {
             Email or phone number
           </label>
           <User
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-mist-dim"
             strokeWidth={1.6}
             aria-hidden="true"
           />
@@ -89,7 +88,7 @@ export function LoginForm() {
             Password
           </label>
           <KeyRound
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-mist-dim"
             strokeWidth={1.6}
             aria-hidden="true"
           />
@@ -107,7 +106,7 @@ export function LoginForm() {
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
-            className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-muted transition-colors duration-[--duration-fast] hover:text-charcoal"
+            className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-mist-dim transition-colors duration-[--duration-fast] hover:text-cream"
           >
             {showPassword ? (
               <EyeOff className="h-5 w-5" strokeWidth={1.6} />
@@ -118,17 +117,17 @@ export function LoginForm() {
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          <label className="flex cursor-pointer items-center gap-2 text-body-sm text-graphite">
+          <label className="flex cursor-pointer items-center gap-2 text-body-sm text-mist">
             <input
               type="checkbox"
               name="remember"
-              className="h-4 w-4 rounded-[3px] border-moss accent-forest-ink"
+              className="h-4 w-4 rounded-[3px] border-border bg-night-card accent-lime"
             />
             Remember me
           </label>
           <Link
             href="/forgot-password"
-            className="text-body-sm font-medium text-forest-ink underline-offset-4 hover:underline"
+            className="text-body-sm font-medium text-lime underline-offset-4 hover:underline"
           >
             Forgot Password?
           </Link>
@@ -137,7 +136,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-field)] bg-forest-ink text-body font-medium text-bone transition-opacity duration-[--duration-fast] hover:opacity-95 disabled:opacity-70"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-field)] bg-lime text-body font-semibold text-night transition-colors duration-[--duration-fast] hover:bg-lime-bright disabled:opacity-70"
         >
           {pending ? (
             <>
@@ -158,9 +157,9 @@ export function LoginForm() {
       </form>
 
       <div className="my-6 flex items-center gap-4" aria-hidden="true">
-        <span className="h-px flex-1 bg-moss" />
-        <span className="text-body-sm text-muted">or</span>
-        <span className="h-px flex-1 bg-moss" />
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-body-sm text-mist-dim">or</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
 
       <div className="space-y-3">
@@ -174,17 +173,17 @@ export function LoginForm() {
           Continue with Google
         </button>
         <button type="button" className={SECONDARY_BTN}>
-          <Mail className="h-4 w-4 text-forest-ink" strokeWidth={1.6} />
+          <Mail className="h-4 w-4 text-lime" strokeWidth={1.6} />
           Continue with Email OTP
         </button>
       </div>
 
       {/* Absent from the reference — new users had no route in (DESIGN.md §5.1). */}
-      <p className="mt-6 text-center text-body-sm text-muted">
+      <p className="mt-6 text-center text-body-sm text-mist">
         New to AgriGrowth?{" "}
         <Link
           href="/get-started"
-          className="font-medium text-forest-ink underline-offset-4 hover:underline"
+          className="font-medium text-lime underline-offset-4 hover:underline"
         >
           Get started
         </Link>

@@ -25,57 +25,61 @@ const ROLES = [
     icon: Map,
     title: "I own farmland",
     body: "Register your land and receive contract offers from verified buyers.",
-    surface: "bg-sage-card",
+    accent: "text-lime",   glow: "from-lime/12",
   },
   {
     role: "WORKER",
     icon: Sprout,
     title: "I work in fields",
     body: "Find work near you, check in on site, and get paid per task.",
-    surface: "bg-peach-card",
+    accent: "text-estimated", glow: "from-estimated/12",
   },
   {
     role: "BUYER",
     icon: ShoppingBasket,
     title: "I buy produce",
     body: "Contract crop production against real, verified land parcels.",
-    surface: "bg-sky-card",
+    accent: "text-info",   glow: "from-info/12",
   },
 ] as const;
 
 export default function GetStartedPage() {
   return (
-    <main className="min-h-dvh bg-bone px-5 py-10 lg:py-16">
+    <main className="min-h-dvh bg-night px-5 py-10 lg:py-16">
       <div className="mx-auto max-w-[1000px]">
         <div className="flex flex-col items-center text-center">
           <LogoLockup />
-          <h1 className="mt-8 font-serif text-heading-sm text-charcoal lg:text-heading">
+          <h1 className="mt-8 font-display text-heading-sm font-semibold text-cream lg:text-heading">
             What brings you here?
           </h1>
-          <p className="mt-3 max-w-[46ch] text-body text-graphite">
+          <p className="mt-3 max-w-[46ch] text-body text-mist">
             Pick the one that fits you best. You can add another later from your
             account settings.
           </p>
         </div>
 
         <ul className="mt-10 grid gap-4 sm:grid-cols-3">
-          {ROLES.map(({ role, icon: Icon, title, body, surface }, i) => (
+          {ROLES.map(({ role, icon: Icon, title, body, accent, glow }, i) => (
             <li key={role}>
               <Link
                 href={`/register?role=${role.toLowerCase()}`}
-                className={`animate-fade-rise group flex h-full min-h-[72px] flex-col rounded-[var(--radius-cards)] ${surface} p-6 transition-transform duration-[--duration-base] ease-[--ease-standard] hover:-translate-y-1`}
+                className={`animate-fade-rise group relative flex h-full min-h-[72px] flex-col overflow-hidden rounded-[var(--radius-panels)] bg-night-raised p-6 ring-hairline transition-colors duration-[--duration-base] ease-[--ease-standard] hover:bg-night-card`}
                 style={{ animationDelay: `${i * 30}ms` }}
               >
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${glow} to-transparent opacity-0 transition-opacity duration-[--duration-base] group-hover:opacity-100`}
+                />
                 <Icon
-                  className="h-6 w-6 text-forest-ink"
+                  className={`relative h-6 w-6 ${accent}`}
                   strokeWidth={1.5}
                   aria-hidden="true"
                 />
-                <h2 className="mt-4 font-serif text-subheading text-charcoal">
+                <h2 className="relative mt-4 font-display text-subheading font-semibold text-cream">
                   {title}
                 </h2>
-                <p className="mt-2 flex-1 text-body-sm text-graphite">{body}</p>
-                <span className="mt-5 inline-flex items-center gap-2 text-body-sm font-medium text-forest-ink">
+                <p className="relative mt-2 flex-1 text-body-sm text-mist">{body}</p>
+                <span className="relative mt-5 inline-flex items-center gap-2 text-body-sm font-medium text-lime">
                   Continue
                   <ArrowRight
                     className="h-4 w-4 transition-transform duration-[--duration-base] ease-[--ease-standard] group-hover:translate-x-1"
@@ -87,11 +91,11 @@ export default function GetStartedPage() {
           ))}
         </ul>
 
-        <p className="mt-10 text-center text-body-sm text-muted">
+        <p className="mt-10 text-center text-body-sm text-mist">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-forest-ink underline-offset-4 hover:underline"
+            className="font-medium text-lime underline-offset-4 hover:underline"
           >
             Log in
           </Link>

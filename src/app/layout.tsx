@@ -1,24 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 /*
-  Inter carries all functional UI (DESIGN.md §3).
-  Cormorant Garamond stands in for Reckless, which is a commercial licence —
-  swap the variable here if the licence is acquired.
-  Devanagari is not covered by either; Noto Sans Devanagari is added when the
-  translation decision lands (DESIGN.md open decision 4).
+  Plus Jakarta Sans carries headings and display; Inter carries UI and body
+  (DESIGN.md §3). Both cover Latin well and are metrically compatible enough
+  to sit together. Devanagari is covered by neither — Noto Sans Devanagari is
+  added when the translation decision lands.
 */
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-jakarta",
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-cormorant",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07503f",
+  themeColor: "#0a0f0b",
   width: "device-width",
   initialScale: 1,
   // Field users need to be able to zoom. Never lock this down.
@@ -40,7 +39,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${inter.variable}`}>
       <body>{children}</body>
     </html>
   );

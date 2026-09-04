@@ -1,80 +1,80 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   AgriGrowth theme — derived from docs/design/theme.css (Arva reference)
-   plus the semantic tokens defined in DESIGN.md §2.
-   Do not edit docs/design/*; that is read-only reference.
+   AgriGrowth theme — dark, derived from the Zenze reference.
+   Contrast ratios in comments are measured, not estimated.
+   See DESIGN.md §2 for the palette rationale and the field-screen carve-out.
    ───────────────────────────────────────────────────────────────────────── */
 
 @theme {
-  /* ── Base palette (Arva, unchanged) ─────────────────────────────────── */
-  --color-forest-ink: #07503f;
-  --color-vivid-lime: #e8fe85;
-  --color-bone: #f1efdf;
-  --color-pure-white: #ffffff;
-  --color-ash-gray: #efefef;
-  --color-charcoal: #212529;
-  --color-graphite: #353535;
-  --color-pewter: #6d6d6d; /* marketing parity only — fails AA on bone (4.47:1) */
-  --color-sky-card: #b2cee7;
-  --color-peach-card: #fceace;
-  --color-sage-card: #e6ecd5;
-  --color-moss: #c3cda7;
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --color-night: #0a0f0b; /* page canvas */
+  --color-night-raised: #121a14; /* panels, nav */
+  --color-night-card: #16211a; /* cards on panels */
+  --color-border: #1f2a20;
+  --color-border-hi: #2b3a2d;
 
-  /* ── Semantic tokens (DESIGN.md §2) — named for meaning, not appearance ─ */
-  --color-verified: #07503f; /* 8.15:1 on bone  · 9.42:1 on white */
-  --color-estimated: #6b5220; /* 6.36:1 on bone  · 7.36:1 on white */
-  --color-warning: #74400a; /* 7.32:1 on bone  · 8.47:1 on white */
-  --color-risk: #8f2018; /* 7.60:1 on bone  · 8.79:1 on white */
-  --color-neutral: #353535; /* 10.60:1 on bone · 12.27:1 on white */
-  --color-muted: #545454; /* 6.55:1 on bone  · 7.57:1 on white */
+  /* ── Text ───────────────────────────────────────────────────────────── */
+  --color-cream: #f4f7f1; /* 17.88:1 on night */
+  --color-mist: #a3b3a4; /* 8.79:1  on night */
+  --color-mist-dim: #8b9c8c; /* 6.66:1  on night — captions only */
 
-  /* Tints for badge and status fills */
-  --color-verified-tint: #e6ecd5;
-  --color-estimated-tint: #f5edd9;
-  --color-warning-tint: #fceace;
-  --color-risk-tint: #f7e3e0;
+  /* ── Brand ──────────────────────────────────────────────────────────── */
+  --color-lime: #a9e34b; /* 12.68:1 on night — primary CTA */
+  --color-lime-bright: #c2f05c;
+  --color-leaf: #7cc243; /* 8.89:1  on night — secondary accent */
+  --color-forest-ink: #07503f; /* retained: print, light contexts, favicon */
+
+  /* ── Semantic (DESIGN.md §2) — named for meaning, not appearance ─────── */
+  --color-verified: #6ee7a0; /* 12.52:1 on night */
+  --color-estimated: #e0b464; /* 10.02:1 on night */
+  --color-warning: #f0a94c; /*  9.65:1 on night */
+  --color-risk: #f58b80; /*  7.6:1  on night */
+  --color-info: #7fc4e8; /* 10.09:1 on night */
+  --color-neutral: #a3b3a4;
+
+  /* Tints for badge fills — 12% of the semantic hue on the dark ground. */
+  --color-verified-tint: #12291d;
+  --color-estimated-tint: #2a2214;
+  --color-warning-tint: #2c2013;
+  --color-risk-tint: #2e1a17;
 
   /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, sans-serif;
-  --font-serif:
-    var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
 
   --text-caption: 12px;
   --text-caption--line-height: 1.5;
-  --text-caption--letter-spacing: 0.025em;
+  --text-caption--letter-spacing: 0.01em;
   --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.5;
-  --text-body-sm--letter-spacing: 0.025em;
+  --text-body-sm--line-height: 1.55;
   --text-body: 16px;
-  --text-body--line-height: 1.52;
-  --text-body--letter-spacing: -0.022em;
+  --text-body--line-height: 1.6;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
   --text-subheading: 24px;
-  --text-subheading--line-height: 1.24;
-  --text-subheading--letter-spacing: -0.012em;
-  --text-heading-sm: 37px;
-  --text-heading-sm--line-height: 1.22;
-  --text-heading-sm--letter-spacing: -0.012em;
-  --text-heading: 45px;
-  --text-heading--line-height: 1.06;
-  --text-heading--letter-spacing: -0.012em;
-  --text-heading-lg: 57px;
-  --text-heading-lg--line-height: 1.06;
-  --text-heading-lg--letter-spacing: -0.022em;
-  --text-display: 80px;
+  --text-subheading--line-height: 1.3;
+  --text-subheading--letter-spacing: -0.015em;
+  --text-heading-sm: 32px;
+  --text-heading-sm--line-height: 1.2;
+  --text-heading-sm--letter-spacing: -0.02em;
+  --text-heading: 44px;
+  --text-heading--line-height: 1.1;
+  --text-heading--letter-spacing: -0.025em;
+  --text-heading-lg: 56px;
+  --text-heading-lg--line-height: 1.05;
+  --text-heading-lg--letter-spacing: -0.03em;
+  --text-display: 72px;
   --text-display--line-height: 1;
-  --text-display--letter-spacing: -0.037em;
+  --text-display--letter-spacing: -0.035em;
 
-  /* ── Radii (Arva shape language) ────────────────────────────────────── */
-  --radius-field: 12px; /* auth inputs + buttons, per login reference */
-  --radius-cards: 20px;
-  --radius-links: 26px;
-  --radius-hero-cards: 30px;
-  --radius-inputs: 33px;
+  /* ── Radii ──────────────────────────────────────────────────────────── */
+  --radius-field: 12px;
+  --radius-cards: 16px;
+  --radius-panels: 24px;
   --radius-buttons: 100px;
-  --radius-nav-pills: 110px;
 
   /* ── Motion (DESIGN.md §12.1) ───────────────────────────────────────── */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -88,24 +88,28 @@
   --duration-deliberate: 500ms;
   --duration-editorial: 800ms;
 
-  /* ── Layout ─────────────────────────────────────────────────────────── */
   --page-max-width: 1200px;
 }
-
-/* ── Base ─────────────────────────────────────────────────────────────── */
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
   }
 
   body {
-    background-color: var(--color-bone);
-    color: var(--color-charcoal);
+    background-color: var(--color-night);
+    color: var(--color-cream);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.52;
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
   }
 
   /* Quantities, currency and dates must not shift width while loading. */
@@ -115,14 +119,15 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Visible focus everywhere — forest ink ring (DESIGN.md §13). */
   :focus-visible {
-    outline: 2px solid var(--color-forest-ink);
+    outline: 2px solid var(--color-lime);
     outline-offset: 2px;
   }
-}
 
-/* ── Motion utilities (DESIGN.md §12.3) ───────────────────────────────── */
+  ::placeholder {
+    color: var(--color-mist-dim);
+  }
+}
 
 @layer utilities {
   @keyframes ag-fade-in {
@@ -150,14 +155,18 @@
   }
 
   .animate-fade-rise {
-    animation: ag-fade-rise var(--duration-base) var(--ease-entrance) both;
+    animation: ag-fade-rise var(--duration-slow) var(--ease-entrance) both;
+  }
+
+  /* Hairline border that reads on the dark ground without becoming a line. */
+  .ring-hairline {
+    box-shadow: inset 0 0 0 1px var(--color-border);
   }
 }
 
 /*
   Reduced motion is substitution, not deletion (DESIGN.md §12.6).
-  Fade+rise collapses to fade; decorative loops stop; progress indicators
-  are left alone because they carry real information.
+  Progress indicators are exempt — they carry real information.
 */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-rise {

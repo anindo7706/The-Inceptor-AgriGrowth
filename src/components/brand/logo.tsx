@@ -21,12 +21,12 @@ export function LeafMark({ className }: { className?: string }) {
   );
 }
 
-/** Forest tile with the leaf mark — the app icon. */
+/** Lime tile with the leaf mark — the app icon. */
 export function LogoTile({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-forest-ink text-bone",
+        "flex items-center justify-center bg-lime text-night",
         "rounded-[var(--radius-field)]",
         className,
       )}
@@ -36,18 +36,18 @@ export function LogoTile({ className }: { className?: string }) {
   );
 }
 
-/**
- * Wordmark — "Agri" in charcoal, "Growth" in forest green, per the login
- * reference's two-tone treatment.
- */
+/** Wordmark — "Agri" in cream, "Growth" in lime. Two-tone, per the reference. */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span
-      className={cn("font-serif tracking-tight text-charcoal", className)}
-      // Serif is Latin-only (DESIGN.md §3); the wordmark is never translated.
+      className={cn(
+        "font-display font-semibold tracking-tight text-cream",
+        className,
+      )}
+      // Never translated.
       translate="no"
     >
-      Agri<span className="text-forest-ink">Growth</span>
+      Agri<span className="text-lime">Growth</span>
     </span>
   );
 }
@@ -57,12 +57,8 @@ export function LogoLockup() {
   return (
     <div className="flex flex-col items-center">
       <LogoTile className="h-14 w-14" />
-      <Wordmark className="mt-4 text-[32px] leading-none" />
-      <p className="mt-2 text-body-sm text-muted">Connect. Cultivate. Thrive.</p>
-      <span
-        className="mt-4 block h-px w-10 bg-forest-ink/50"
-        aria-hidden="true"
-      />
+      <Wordmark className="mt-4 text-[30px] leading-none" />
+      <p className="mt-2 text-body-sm text-mist">Connect. Cultivate. Thrive.</p>
     </div>
   );
 }

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Inter,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 import "./globals.css";
 
 /*
@@ -12,6 +16,19 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-jakarta",
+  display: "swap",
+});
+
+/*
+  Serif italic, used for a single accent word in the marketing headline and
+  nowhere else. Latin-only, so it must never carry translated copy
+  (DESIGN.md §3).
+*/
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400"],
+  style: ["italic"],
+  variable: "--font-accent",
   display: "swap",
 });
 
@@ -39,8 +56,17 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${inter.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${jakarta.variable} ${inter.variable} ${cormorant.variable}`}>
+      {/*
+        Extensions like Grammarly and password managers add attributes to
+        <body> before React hydrates, which reads as a hydration mismatch and
+        is not something the app can prevent.
+
+        suppressHydrationWarning applies to THIS element only — its own
+        attributes and text, one level deep. It does not silence mismatches
+        inside the tree, so a real bug in a page still surfaces normally.
+      */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

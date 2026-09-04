@@ -36,6 +36,9 @@ const DEMO_USERS = [
   {
     id: "00000000-0000-4000-8000-000000000003",
     fullName: "Demo Worker",
+    // Phone is how a worker signs in for real (§35); the email exists so the
+    // account is testable before an SMS provider is configured.
+    email: "worker@demo.agrigrowth.test",
     phone: "+910000000003",
     roles: ["WORKER"],
   },
@@ -45,6 +48,7 @@ const DEMO_USERS = [
     // column, this row stops being representable and the seed breaks loudly.
     id: "00000000-0000-4000-8000-000000000004",
     fullName: "Demo Smallholder (owns land, also works)",
+    email: "smallholder@demo.agrigrowth.test",
     phone: "+910000000004",
     roles: ["LANDOWNER", "WORKER"],
   },
@@ -230,7 +234,15 @@ async function seedUsers() {
   for (const user of DEMO_USERS) {
     await prisma.user.upsert({
       where: { id: user.id },
-      update: { fullName: user.fullName },
+      // Identifiers are reconciled too, not just the name — otherwise a
+      // demo account that gains an email in this file never gets one in the
+      // database, and the failure shows up much later as a login that does
+      // not work.
+      update: {
+        fullName: user.fullName,
+        email: "email" in user ? user.email : null,
+        phone: "phone" in user ? user.phone : null,
+      },
       create: {
         id: user.id,
         fullName: user.fullName,

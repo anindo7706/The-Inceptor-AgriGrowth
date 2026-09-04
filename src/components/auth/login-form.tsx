@@ -2,52 +2,84 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, KeyRound, Loader2, Mail, User } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AlertCircle, Eye, EyeOff, KeyRound, Loader2, User } from "lucide-react";
 import { LeafMark } from "@/components/brand/logo";
-
-/** Google's mark. Inlined — a CDN <img> is blocked by our own CSP posture. */
-function GoogleMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M23.5 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.56-5.15 3.56-8.64Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.29a12 12 0 0 0 0 10.76l3.98-3.09Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.7 0 3.99 2.47 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75Z"
-      />
-    </svg>
-  );
-}
+import { createClient } from "@/lib/supabase/client";
+import { GoogleButton } from "./google-button";
 
 const FIELD =
   "h-14 w-full rounded-[var(--radius-field)] border border-border bg-night-card pl-11 pr-4 text-body text-cream " +
   "transition-colors duration-[--duration-fast] focus:border-lime focus:outline-none";
 
-const SECONDARY_BTN =
-  "flex h-14 w-full items-center justify-center gap-3 rounded-[var(--radius-field)] border border-border " +
-  "bg-night-card text-body-sm font-medium text-cream transition-colors duration-[--duration-fast] " +
-  "hover:border-border-hi hover:bg-night-raised";
+/**
+ * Supabase returns deliberately vague errors for bad credentials so an
+ * attacker cannot tell "no such account" from "wrong password". We keep that
+ * property and only rewrite the wording to be human.
+ */
+function readableError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials")) {
+    return "That email and password don't match an account.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Check your inbox and confirm your email address first.";
+  }
+  if (m.includes("rate limit") || m.includes("too many")) {
+    return "Too many attempts. Wait a minute and try again.";
+  }
+  return "We couldn't sign you in. Please try again.";
+}
 
 export function LoginForm() {
+  const router = useRouter();
+  const params = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Supabase wiring lands in Phase 2 — see PLAN.md. The identifier field
-  // accepts email or phone and routes to the matching method there.
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const next = params.get("next");
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : null;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     setPending(true);
-    setTimeout(() => setPending(false), 900);
+
+    const form = new FormData(event.currentTarget);
+    const identifier = String(form.get("identifier") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+
+    const supabase = createClient();
+
+    /*
+      One field for email or phone (DESIGN.md §5.1): the user should not have
+      to categorise themselves at the door. Detect which they typed and call
+      the matching method. Phone sign-in stays behind an SMS provider, so an
+      unconfigured project surfaces the provider's own error rather than
+      failing silently.
+    */
+    const looksLikePhone = /^\+?[0-9\s-]{8,}$/.test(identifier);
+
+    const { error: signInError } = looksLikePhone
+      ? await supabase.auth.signInWithPassword({
+          phone: identifier.replace(/[\s-]/g, ""),
+          password,
+        })
+      : await supabase.auth.signInWithPassword({
+          email: identifier,
+          password,
+        });
+
+    if (signInError) {
+      setError(readableError(signInError.message));
+      setPending(false);
+      return;
+    }
+
+    // /home resolves which dashboard, since roles live in Postgres.
+    router.push(safeNext ?? "/home");
+    router.refresh();
   }
 
   return (
@@ -60,6 +92,20 @@ export function LoginForm() {
           Login to continue your journey
         </p>
       </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="mt-6 flex items-start gap-3 rounded-[var(--radius-field)] bg-risk-tint p-4"
+        >
+          <AlertCircle
+            className="mt-0.5 h-4 w-4 shrink-0 text-risk"
+            strokeWidth={1.8}
+            aria-hidden="true"
+          />
+          <p className="text-body-sm text-cream">{error}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div className="relative">
@@ -76,7 +122,6 @@ export function LoginForm() {
             name="identifier"
             type="text"
             autoComplete="username"
-            inputMode="email"
             required
             placeholder="Email or Phone Number"
             className={FIELD}
@@ -121,6 +166,7 @@ export function LoginForm() {
             <input
               type="checkbox"
               name="remember"
+              defaultChecked
               className="h-4 w-4 rounded-[3px] border-border bg-night-card accent-lime"
             />
             Remember me
@@ -162,23 +208,8 @@ export function LoginForm() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <div className="space-y-3">
-        {/*
-          Google is shown on the buyer/landowner path only — see DESIGN.md
-          §5.1 change 2. It is close to useless for workers and adds an
-          identity provider to the trust chain.
-        */}
-        <button type="button" className={SECONDARY_BTN}>
-          <GoogleMark />
-          Continue with Google
-        </button>
-        <button type="button" className={SECONDARY_BTN}>
-          <Mail className="h-4 w-4 text-lime" strokeWidth={1.6} />
-          Continue with Email OTP
-        </button>
-      </div>
+      <GoogleButton next={safeNext ?? undefined} />
 
-      {/* Absent from the reference — new users had no route in (DESIGN.md §5.1). */}
       <p className="mt-6 text-center text-body-sm text-mist">
         New to AgriGrowth?{" "}
         <Link

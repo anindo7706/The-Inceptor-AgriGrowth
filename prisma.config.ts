@@ -1,14 +1,21 @@
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { defineConfig } from "prisma/config";
 
 /*
-  Prisma config lives here rather than in package.json, which Prisma 6
-  deprecates.
+  Prisma 6 stops auto-loading .env files as soon as this config file exists,
+  so we load them here. Node's built-in loader — no dotenv dependency.
 
-  Note on versions: Prisma 7's CLI is a platform tool with no `generate` or
-  `migrate` commands, so this project pins Prisma 6 — the stable ORM whose
+  .env.local wins over .env, matching Next.js's own precedence.
+
+  Version note: Prisma 7's CLI is a platform tool with no `generate` or
+  `migrate` command, so this project pins Prisma 6 — the stable ORM whose
   commands CLAUDE.md §8 documents. Revisit when v7's ORM story settles.
 */
+for (const file of [".env", ".env.local"]) {
+  if (existsSync(file)) process.loadEnvFile(file);
+}
+
 export default defineConfig({
   schema: path.join("prisma", "schema.prisma"),
   migrations: {
